@@ -1,0 +1,167 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Parameters:  #   Type: String
+  Environment:
+    Type: String
+Resources:
+  # =========================================================================================
+  # IAM ROLE, POLICIES
+  # =========================================================================================
+  IAM_ROLE:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+            - firehose.amazonaws.com
+            - kinesis.amazonaws.com
+            - logs.amazonaws.com
+            - s3.amazonaws.com
+            - glue.amazonaws.com
+            - dynamodb.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:IAM::aws:policy/AmazonKinesisFullAccess
+      - arn:aws:IAM::aws:policy/AWSLambdaExecute
+      Path: '/'
+  FIREHOSE_POLICY:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-firehose-policy'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: FirehoseAccess
+          Effect: Allow
+          Action:
+          - firehose:CreateDeliveryStream
+          - firehose:DeleteDeliveryStream
+          - firehose:DescribeDeliveryStream
+          - firehose:PutRecord
+          - firehose:PutRecordBatch
+          - firehose:UpdateDestination
+          - firehose:ListDeliveryStreams
+          Resource: arn:aws:firehose:*:*:deliverystream/{firehose_name} # TODO: get arn name
+      Roles:
+      - !Ref IAM_ROLE
+  DATA_STREAM_POLICY:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-data-stream-policy'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: DataStreamAccess
+          Effect: Allow
+          Action:
+          - kinesis:CreateStream
+          - kinesis:DeleteStream
+          - kinesis:DescribeStream
+          - kinesis:GetShardIterator
+          - kinesis:ListShards
+          - kinesis:DescribeStreamSummary
+          - kinesis:GetRecords
+          - kinesis:PutRecord
+          - kinesis:PutRecords
+          - kinesis:UpdateShardCount
+          Resource: arn:aws:kinesis:*:*:stream/{firehose_name} # TODO: get arn name
+      Roles:
+      - !Ref IAM_ROLE
+  S3_POLICY:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-s3-policy'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: S3Access
+          Effect: Allow
+          Action:
+          - s3:PutObject
+          - s3:AbortMultipartUpload
+          - s3:GetBucketLocation
+          - s3:GetObject
+          - s3:ListBucket
+          - s3:ListBucketMultipartUploads
+          Resource: *
+      Roles:
+      - !Ref IAM_ROLE
+  LOGS_POLICY:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-logs-policy'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: LogsAccess
+          Effect: Allow
+          Action:
+          - logs:CreateLogGroup
+          - logs:DeleteLogGroup
+          - logs:CreateLogStream
+          - logs:DeleteLogStream
+          - logs:PutLogEvents
+          Resource: arn:aws:logs:*:*:*
+      Roles:
+      - !Ref IAM_ROLE
+  LAMBDA_POLICY:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-lambda-policy'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: LambdaAccess
+          Effect: Allow
+          Action:
+          - lambda:InvokeFunction
+          - lambda:GetFunctionConfiguration
+          Resource: arn:aws:lambda:*:*:*:*:*
+      Roles:
+      - !Ref IAM_ROLE
+  GLUE_POLICY:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-glue-policy'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: GlueAccess
+          Effect: Allow
+          Action:
+          - glue:CreateTable
+          - glue:CreateDatabase
+          - glue:GetDatabase
+          - glue:GetPartition
+          - glue:GetTable
+          - glue:UpdateTable
+          - glue:UpdatePartition
+          - glue:BatchGetPartition
+          - glue:BatchCreatePartition
+          Resource: arn:aws:glue:*:*:*
+      Roles:
+      - !Ref IAM_ROLE
+  DYNAMODB_POLICY:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub '${AWS::StackName}-dynamodb-policy'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: DynamoDBAccess
+          Effect: Allow
+          Action:
+          - dynamodb:GetRecords
+          - dynamodb:GetShardIterator
+          - dynamodb:DescribeStream
+          - dynamodb:ListShards
+          - dynamodb:ListStreams
+          Resource: arn:aws:dynamodb:us-east-1:*:table/*/stream/*
+      Roles:
+      - !Ref IAM_ROLE
