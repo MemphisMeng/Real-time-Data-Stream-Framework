@@ -9,7 +9,7 @@ Parameters:  #   Type: String
     Description: The amount of shards contained in a stream
 Resources:
   # =========================================================================================
-  # IAM ROLE, POLICIES
+  # IAM ROLE, POLICY
   # =========================================================================================
   IAM_ROLE:
     Type: AWS::IAM::Role
@@ -34,10 +34,11 @@ Resources:
       - arn:aws:IAM::aws:policy/AmazonKinesisFullAccess
       - arn:aws:IAM::aws:policy/AWSLambdaExecute
       Path: '/'
-  FIREHOSE_POLICY:
+
+  IAM_POLICY:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub '${Environment}-${AWS::StackName}-firehose-policy'
+      PolicyName: !Sub '${Environment}-${AWS::StackName}-policy'
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -52,15 +53,6 @@ Resources:
           - firehose:UpdateDestination
           - firehose:ListDeliveryStreams
           Resource: arn:aws:firehose:*:*:deliverystream/{firehose_name} # TODO: get arn name
-      Roles:
-      - !Ref IAM_ROLE
-  DATA_STREAM_POLICY:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: !Sub '${Environment}-${AWS::StackName}-data-stream-policy'
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
         - Sid: DataStreamAccess
           Effect: Allow
           Action:
@@ -75,15 +67,6 @@ Resources:
           - kinesis:PutRecords
           - kinesis:UpdateShardCount
           Resource: arn:aws:kinesis:*:*:stream/{firehose_name} # TODO: get arn name
-      Roles:
-      - !Ref IAM_ROLE
-  S3_POLICY:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: !Sub '${Environment}-${AWS::StackName}-s3-policy'
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
         - Sid: S3Access
           Effect: Allow
           Action:
@@ -94,15 +77,6 @@ Resources:
           - s3:ListBucket
           - s3:ListBucketMultipartUploads
           Resource: *
-      Roles:
-      - !Ref IAM_ROLE
-  LOGS_POLICY:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: !Sub '${Environment}-${AWS::StackName}-logs-policy'
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
         - Sid: LogsAccess
           Effect: Allow
           Action:
@@ -111,31 +85,14 @@ Resources:
           - logs:CreateLogStream
           - logs:DeleteLogStream
           - logs:PutLogEvents
+          - logs:DeleteRetentionPolicy
           Resource: arn:aws:logs:*:*:*
-      Roles:
-      - !Ref IAM_ROLE
-  LAMBDA_POLICY:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: !Sub '${Environment}-${AWS::StackName}-lambda-policy'
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
         - Sid: LambdaAccess
           Effect: Allow
           Action:
           - lambda:InvokeFunction
           - lambda:GetFunctionConfiguration
           Resource: arn:aws:lambda:*:*:*:*:*
-      Roles:
-      - !Ref IAM_ROLE
-  GLUE_POLICY:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: !Sub '${Environment}-${AWS::StackName}-glue-policy'
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
         - Sid: GlueAccess
           Effect: Allow
           Action:
@@ -149,15 +106,6 @@ Resources:
           - glue:BatchGetPartition
           - glue:BatchCreatePartition
           Resource: arn:aws:glue:*:*:*
-      Roles:
-      - !Ref IAM_ROLE
-  DYNAMODB_POLICY:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: !Sub '${Environment}-${AWS::StackName}-dynamodb-policy'
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
         - Sid: DynamoDBAccess
           Effect: Allow
           Action:
@@ -179,3 +127,12 @@ Resources:
       Name: !Sub '${Environment}-${AWS::StackName}-Kinesis-Stream'
       ShardCount: !Ref Shard
       RetentionPeriodHours: 8760
+
+  # =========================================================================================
+  # Logs
+  # =========================================================================================
+  # log group
+  LOG_GROUP:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Sub '${Environment}-${AWS::StackName}-Log-Group'
