@@ -3,6 +3,10 @@ Transform: 'AWS::Serverless-2016-10-31'
 Parameters:  #   Type: String
   Environment:
     Type: String
+  Shard:
+    Type: Integer
+    Default: 1
+    Description: The amount of shards contained in a stream
 Resources:
   # =========================================================================================
   # IAM ROLE, POLICIES
@@ -10,7 +14,7 @@ Resources:
   IAM_ROLE:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub '${AWS::StackName}-role'
+      RoleName: !Sub '${Environment}-${AWS::StackName}-role'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -33,7 +37,7 @@ Resources:
   FIREHOSE_POLICY:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub '${AWS::StackName}-firehose-policy'
+      PolicyName: !Sub '${Environment}-${AWS::StackName}-firehose-policy'
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -53,7 +57,7 @@ Resources:
   DATA_STREAM_POLICY:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub '${AWS::StackName}-data-stream-policy'
+      PolicyName: !Sub '${Environment}-${AWS::StackName}-data-stream-policy'
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -76,7 +80,7 @@ Resources:
   S3_POLICY:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub '${AWS::StackName}-s3-policy'
+      PolicyName: !Sub '${Environment}-${AWS::StackName}-s3-policy'
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -95,7 +99,7 @@ Resources:
   LOGS_POLICY:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub '${AWS::StackName}-logs-policy'
+      PolicyName: !Sub '${Environment}-${AWS::StackName}-logs-policy'
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -113,7 +117,7 @@ Resources:
   LAMBDA_POLICY:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub '${AWS::StackName}-lambda-policy'
+      PolicyName: !Sub '${Environment}-${AWS::StackName}-lambda-policy'
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -128,7 +132,7 @@ Resources:
   GLUE_POLICY:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub '${AWS::StackName}-glue-policy'
+      PolicyName: !Sub '${Environment}-${AWS::StackName}-glue-policy'
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -150,7 +154,7 @@ Resources:
   DYNAMODB_POLICY:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub '${AWS::StackName}-dynamodb-policy'
+      PolicyName: !Sub '${Environment}-${AWS::StackName}-dynamodb-policy'
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -165,3 +169,13 @@ Resources:
           Resource: arn:aws:dynamodb:us-east-1:*:table/*/stream/*
       Roles:
       - !Ref IAM_ROLE
+
+  # =========================================================================================
+  # KINESIS DATA STREAM
+  # =========================================================================================
+  DATA_STREAM:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub '${Environment}-${AWS::StackName}-Kinesis-Stream'
+      ShardCount: !Ref Shard
+      RetentionPeriodHours: 8760
