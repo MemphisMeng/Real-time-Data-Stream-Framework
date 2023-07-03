@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Parameters:  #   Type: String
+Parameters:
   Environment:
     Type: String
   Shard:
@@ -42,7 +42,7 @@ Resources:
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Sid: FirehoseAccess
+        - Sid: DeliverStreamAccess
           Effect: Allow
           Action:
           - firehose:CreateDeliveryStream
@@ -136,3 +136,122 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub '${Environment}-${AWS::StackName}-Log-Group'
+  # log stream
+  LOG_STREAM:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !GetAtt LOG_GROUP.LogGroupName
+
+  # =========================================================================================
+  # S3 Bucket
+  # =========================================================================================
+  S3_BUCKET:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${Environment}-${AWS::StackName}-Crawler-Target'
+      AccessControl: 'BucketOwnerFullControl'
+
+  # =========================================================================================
+  # Glue Crawlers
+  # =========================================================================================
+  GLUE_CRAWLER:
+    Type: AWS::Glue::Crawler
+    Properties: 
+      Configuration: '{"Version": 1.0, "Grouping": {"TableGroupingPolicy": "CombineCompatibleSchemas" }, "CrawlerOutput": {"Partitions": { "AddOrUpdateBehavior": "InheritFromTable" }}}'
+      DatabaseName: !Sub '${Environment}-${AWS::StackName}-Raw'
+      Name: !Sub '${Environment}-${AWS::StackName}-Glue-Crawler'
+      RecrawlPolicy:
+        RecrawlBehavior: 'CRAWL_NEW_FOLDERS_ONLY'
+      Role: !Ref IAM_ROLE
+      Schedule:
+        ScheduleExpression: 'cron(1 * * * ? *)'
+      SchemaChangePolicy:
+        DeleteBehavior: 'LOG'
+        UpdateBehavior: 'LOG'
+      Targets:
+        S3Targets:
+          - Path: !Ref MyS3Bucket
+
+  # =========================================================================================
+  # Kinesis Deliver Stream
+  # =========================================================================================
+  DELIVER_STREAM:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties: 
+      DeliveryStreamName: !Sub '${Environment}-${AWS::StackName}-Deliver-Stream'
+      DeliveryStreamType: 'KinesisStreamAsSource'
+      ExtendedS3DestinationConfiguration: 
+        BucketARN: !Ref S3_BUCKET.Arn
+        BufferingHints:
+          SizeInMBs: 128
+          IntervalInSeconds: 900
+        RoleARN: !Ref IAM_ROLE.Arn
+        Prefix:
+        ErrorOutputPrefix:
+        CompressionFormat: 'GZIP'
+        DataFormatConversionConfiguration:
+          Enabled: true
+        EncryptionConfiguration:
+          NoEncryptionConfig: 'NoEncryption'
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Ref LOG_GROUP.LogGroupName
+          LogStreamName: !Ref LOG_STREAM.LogStreamName
+      KinesisStreamSourceConfiguration: 
+        KinesisStreamARN: !Ref DATA_STREAM.Arn
+        RoleARN: !Ref IAM_ROLE.Arn
+
+  # =========================================================================================
+  # AWS CLOUDWATCH ALARM
+  # =========================================================================================
+  TOPIC:
+    Type: AWS::SNS::Topic
+    Properties: 
+      FifoTopic: false
+      Subscription: 
+        - Endpoint: abc@gmail.com
+          Protocol: email
+      TopicName: !Sub '${Environment}-${AWS::StackName}-Topic'
+      TracingConfig: String
+
+  DATA_STREAM_ALARM:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      MetricName: 'WriteProvisionedThroughputExceeded'
+      Namespace: 'AWS/Kinesis'
+      Period: 300
+      Dimensions:
+        - Name: StreamName
+          Value: !Ref DATA_STREAM.Name
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Period: 300
+      Statistic: Sum
+      DatapointsToAlarm: 1
+      Threshold: 1
+      AlarmName: !Sub '${Environment}-${AWS::StackName}-Data-Stream-Alarm'
+      ActionsEnabled: true
+      TreatMissingData: missing
+      AlarmActions:
+        - !Ref TOPIC.Arn
+  
+  DELIVER_STREAM_ALARM:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      MetricName: 'WriteProvisionedThroughputExceeded'
+      Namespace: 'AWS/Kinesis'
+      Period: 300
+      Dimensions:
+        - Name: StreamName
+          Value: !Ref DELIVER_STREAM.Name
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Period: 300
+      Statistic: Sum
+      DatapointsToAlarm: 1
+      Threshold: 1
+      AlarmName: !Sub '${Environment}-${AWS::StackName}-Deliver-Stream-Alarm'
+      ActionsEnabled: true
+      TreatMissingData: missing
+      AlarmActions:
+        - !Ref TOPIC.Arn
