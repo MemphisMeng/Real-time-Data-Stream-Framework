@@ -52,7 +52,10 @@ Resources:
           - firehose:PutRecordBatch
           - firehose:UpdateDestination
           - firehose:ListDeliveryStreams
-          Resource: arn:aws:firehose:*:*:deliverystream/{firehose_name} # TODO: get arn name
+          Resource: !Join
+            - ''
+            - - 'arn:aws:firehose:*:*:deliverystream/'
+              - !Ref DELIVER_STREAM.DeliveryStreamName
         - Sid: DataStreamAccess
           Effect: Allow
           Action:
@@ -66,7 +69,10 @@ Resources:
           - kinesis:PutRecord
           - kinesis:PutRecords
           - kinesis:UpdateShardCount
-          Resource: arn:aws:kinesis:*:*:stream/{firehose_name} # TODO: get arn name
+          Resource: !Join
+            - ''
+            - - 'arn:aws:kinesis:*:*:stream/'
+              - !Ref DELIVER_STREAM.DeliveryStreamName
         - Sid: S3Access
           Effect: Allow
           Action:
@@ -76,7 +82,7 @@ Resources:
           - s3:GetObject
           - s3:ListBucket
           - s3:ListBucketMultipartUploads
-          Resource: *
+          Resource: !Ref S3_BUCKET.Arn
         - Sid: LogsAccess
           Effect: Allow
           Action:
@@ -86,7 +92,11 @@ Resources:
           - logs:DeleteLogStream
           - logs:PutLogEvents
           - logs:DeleteRetentionPolicy
-          Resource: arn:aws:logs:*:*:*
+          Resource: !Join
+            - ''
+            - - 'arn:aws:logs:*:log-group:'
+              - !Ref LOG_GROUP.LogGroupName
+              - ':*'
         - Sid: LambdaAccess
           Effect: Allow
           Action:
