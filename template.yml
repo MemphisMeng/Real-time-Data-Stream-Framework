@@ -212,6 +212,26 @@ Resources:
         RoleARN: !Ref IAM_ROLE.Arn
 
   # =========================================================================================
+  # AWS LAMBDA FUNCTION
+  # ========================================================================================= 
+  STREAMING_FUNCTION:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${Environment}-${AWS::StackName}-Streaming-Function'
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.7
+      CodeUri: lambda/
+      Description: Deliver new data into S3 whenever a new upsert in DynamoDB tables is detected via Kinesis
+      MemorySize: 128
+      Timeout: 900
+      Role: !GetAtt IAM_ROLE.Arn
+      Environment:
+        Variables:
+          LOGGING_LEVEL: INFO
+          APP_ENV: !Ref Environment
+          DATA_STREAM: !REf DATA_STREAM.Name
+
+  # =========================================================================================
   # AWS CLOUDWATCH ALARM
   # =========================================================================================
   TOPIC:
@@ -265,3 +285,19 @@ Resources:
       TreatMissingData: missing
       AlarmActions:
         - !Ref TOPIC.Arn
+
+  BranchErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref BranchCollector
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 300
+      Statistic: Sum
+      Threshold: '1'
+      AlarmActions: 
+        - arn:aws:sns:us-east-1:{id}:{alarm-name}
