@@ -245,12 +245,13 @@ Resources:
           APP_ENV: !Ref Environment
           DATA_STREAM: !REf DataStream.Name
       Events:
-        Type: DynamoDB
-        Properties:
-          Stream: !Ref DATA_SOURCE_ARN
-          BatchSize: 1000
-          StartingPosition: TRIM_HORIZON
-          MaximumRetryAttempts: 1
+        DynamoDBTrigger:
+          Type: DynamoDB
+          Properties:
+            Stream: !Ref DATA_SOURCE_ARN
+            BatchSize: 1000
+            StartingPosition: TRIM_HORIZON
+            MaximumRetryAttempts: 1
 
   # =========================================================================================
   # AWS CLOUDWATCH ALARM
