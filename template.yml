@@ -228,8 +228,15 @@ Resources:
       Environment:
         Variables:
           LOGGING_LEVEL: INFO
+          APP_NAME: !Sub '${Environment}-${AWS::StackName}-Streaming-Function'
           APP_ENV: !Ref Environment
           DATA_STREAM: !REf DATA_STREAM.Name
+      Events:
+        Type: DynamoDB
+        Properties:
+          BatchSize: 1000
+          StartingPosition: TRIM_HORIZON
+          MaximumRetryAttempts: 1
 
   # =========================================================================================
   # AWS CLOUDWATCH ALARM
@@ -286,13 +293,13 @@ Resources:
       AlarmActions:
         - !Ref TOPIC.Arn
 
-  BranchErrorAlarm:
+  STREAMING_FUNCTION_ALARM:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
-          Value: !Ref BranchCollector
+          Value: !Ref STREAMING_FUNCTION
       EvaluationPeriods: 1
       MetricName: Errors
       Namespace: AWS/Lambda
