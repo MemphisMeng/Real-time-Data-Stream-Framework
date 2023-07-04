@@ -18,7 +18,7 @@ Resources:
   # =========================================================================================
   # IAM ROLE, POLICY
   # =========================================================================================
-  IAM_ROLE:
+  IamRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Sub '${Environment}-${AWS::StackName}-role'
@@ -42,7 +42,7 @@ Resources:
       - arn:aws:IAM::aws:policy/AWSLambdaExecute
       Path: '/'
 
-  IAM_POLICY:
+  IamPolicy:
     Type: AWS::IAM::Policy
     Properties:
       PolicyName: !Sub '${Environment}-${AWS::StackName}-policy'
@@ -62,7 +62,7 @@ Resources:
           Resource: !Join
             - ''
             - - 'arn:aws:firehose:*:*:deliverystream/'
-              - !Ref DELIVER_STREAM.DeliveryStreamName
+              - !Ref DeliverStream.DeliveryStreamName
         - Sid: DataStreamAccess
           Effect: Allow
           Action:
@@ -79,7 +79,7 @@ Resources:
           Resource: !Join
             - ''
             - - 'arn:aws:kinesis:*:*:stream/'
-              - !Ref DELIVER_STREAM.DeliveryStreamName
+              - !Ref DeliverStream.DeliveryStreamName
         - Sid: S3Access
           Effect: Allow
           Action:
@@ -89,7 +89,7 @@ Resources:
           - s3:GetObject
           - s3:ListBucket
           - s3:ListBucketMultipartUploads
-          Resource: !Ref S3_BUCKET.Arn
+          Resource: !Ref S3Bucket.Arn
         - Sid: LogsAccess
           Effect: Allow
           Action:
@@ -102,7 +102,7 @@ Resources:
           Resource: !Join
             - ''
             - - 'arn:aws:logs:*:log-group:'
-              - !Ref LOG_GROUP.LogGroupName
+              - !Ref LogGroup.LogGroupName
               - ':*'
         - Sid: LambdaAccess
           Effect: Allow
@@ -133,12 +133,12 @@ Resources:
           - dynamodb:ListStreams
           Resource: arn:aws:dynamodb:us-east-1:*:table/*/stream/*
       Roles:
-      - !Ref IAM_ROLE
+      - !Ref IamRole
 
   # =========================================================================================
   # KINESIS DATA STREAM
   # =========================================================================================
-  DATA_STREAM:
+  DataStream:
     Type: AWS::Kinesis::Stream
     Properties:
       Name: !Sub '${Environment}-${AWS::StackName}-Kinesis-Stream'
@@ -149,20 +149,20 @@ Resources:
   # Logs
   # =========================================================================================
   # log group
-  LOG_GROUP:
+  LogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub '${Environment}-${AWS::StackName}-Log-Group'
   # log stream
-  LOG_STREAM:
+  LogStream:
     Type: AWS::Logs::LogStream
     Properties:
-      LogGroupName: !GetAtt LOG_GROUP.LogGroupName
+      LogGroupName: !GetAtt LogGroup.LogGroupName
 
   # =========================================================================================
   # S3 Bucket
   # =========================================================================================
-  S3_BUCKET:
+  S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub '${Environment}-${AWS::StackName}-Crawler-Target'
@@ -171,7 +171,7 @@ Resources:
   # =========================================================================================
   # Glue Crawlers
   # =========================================================================================
-  GLUE_CRAWLER:
+  GlueCrawler:
     Type: AWS::Glue::Crawler
     Properties: 
       Configuration: '{"Version": 1.0, "Grouping": {"TableGroupingPolicy": "CombineCompatibleSchemas" }, "CrawlerOutput": {"Partitions": { "AddOrUpdateBehavior": "InheritFromTable" }}}'
@@ -179,7 +179,7 @@ Resources:
       Name: !Sub '${Environment}-${AWS::StackName}-Glue-Crawler'
       RecrawlPolicy:
         RecrawlBehavior: 'CRAWL_NEW_FOLDERS_ONLY'
-      Role: !Ref IAM_ROLE
+      Role: !Ref IamRole
       Schedule:
         ScheduleExpression: 'cron(1 * * * ? *)'
       SchemaChangePolicy:
@@ -192,17 +192,17 @@ Resources:
   # =========================================================================================
   # Kinesis Deliver Stream
   # =========================================================================================
-  DELIVER_STREAM:
+  DeliverStream:
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties: 
       DeliveryStreamName: !Sub '${Environment}-${AWS::StackName}-Deliver-Stream'
       DeliveryStreamType: 'KinesisStreamAsSource'
       ExtendedS3DestinationConfiguration: 
-        BucketARN: !Ref S3_BUCKET.Arn
+        BucketARN: !Ref S3Bucket.Arn
         BufferingHints:
           SizeInMBs: 128
           IntervalInSeconds: 900
-        RoleARN: !Ref IAM_ROLE.Arn
+        RoleARN: !Ref IamRole.Arn
         Prefix: !Join
           - ''
           - - !Ref DATA_SOURCE
@@ -218,16 +218,16 @@ Resources:
           NoEncryptionConfig: 'NoEncryption'
         CloudWatchLoggingOptions:
           Enabled: true
-          LogGroupName: !Ref LOG_GROUP.LogGroupName
-          LogStreamName: !Ref LOG_STREAM.LogStreamName
+          LogGroupName: !Ref LogGroup.LogGroupName
+          LogStreamName: !Ref LogStream.LogStreamName
       KinesisStreamSourceConfiguration: 
-        KinesisStreamARN: !Ref DATA_STREAM.Arn
-        RoleARN: !Ref IAM_ROLE.Arn
+        KinesisStreamARN: !Ref DataStream.Arn
+        RoleARN: !Ref IamRole.Arn
 
   # =========================================================================================
   # AWS LAMBDA FUNCTION
   # ========================================================================================= 
-  STREAMING_FUNCTION:
+  StreamingFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub '${Environment}-${AWS::StackName}-Streaming-Function'
@@ -237,13 +237,13 @@ Resources:
       Description: Deliver new data into S3 whenever a new upsert in DynamoDB tables is detected via Kinesis
       MemorySize: 128
       Timeout: 900
-      Role: !GetAtt IAM_ROLE.Arn
+      Role: !GetAtt IamRole.Arn
       Environment:
         Variables:
           LOGGING_LEVEL: INFO
           APP_NAME: !Sub '${Environment}-${AWS::StackName}-Streaming-Function'
           APP_ENV: !Ref Environment
-          DATA_STREAM: !REf DATA_STREAM.Name
+          DATA_STREAM: !REf DataStream.Name
       Events:
         Type: DynamoDB
         Properties:
@@ -255,7 +255,7 @@ Resources:
   # =========================================================================================
   # AWS CLOUDWATCH ALARM
   # =========================================================================================
-  TOPIC:
+  Topic:
     Type: AWS::SNS::Topic
     Properties: 
       FifoTopic: false
@@ -265,7 +265,7 @@ Resources:
       TopicName: !Sub '${Environment}-${AWS::StackName}-Topic'
       TracingConfig: String
 
-  DATA_STREAM_ALARM:
+  DataStreamAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
       MetricName: 'WriteProvisionedThroughputExceeded'
@@ -273,7 +273,7 @@ Resources:
       Period: 300
       Dimensions:
         - Name: StreamName
-          Value: !Ref DATA_STREAM.Name
+          Value: !Ref DataStream.Name
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       Period: 300
@@ -284,9 +284,9 @@ Resources:
       ActionsEnabled: true
       TreatMissingData: missing
       AlarmActions:
-        - !Ref TOPIC.Arn
+        - !Ref Topic.Arn
   
-  DELIVER_STREAM_ALARM:
+  DeliverStreamAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
       MetricName: 'WriteProvisionedThroughputExceeded'
@@ -294,7 +294,7 @@ Resources:
       Period: 300
       Dimensions:
         - Name: StreamName
-          Value: !Ref DELIVER_STREAM.Name
+          Value: !Ref DeliverStream.Name
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       Period: 300
@@ -305,15 +305,15 @@ Resources:
       ActionsEnabled: true
       TreatMissingData: missing
       AlarmActions:
-        - !Ref TOPIC.Arn
+        - !Ref Topic.Arn
 
-  STREAMING_FUNCTION_ALARM:
+  StreamingFunctionAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
-          Value: !Ref STREAMING_FUNCTION
+          Value: !Ref StreamingFunction
       EvaluationPeriods: 1
       MetricName: Errors
       Namespace: AWS/Lambda
@@ -321,4 +321,4 @@ Resources:
       Statistic: Sum
       Threshold: '1'
       AlarmActions: 
-        - arn:aws:sns:us-east-1:{id}:{alarm-name}
+        - !Ref Topic.Arn
