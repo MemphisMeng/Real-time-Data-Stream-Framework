@@ -7,6 +7,13 @@ Parameters:
     Type: Integer
     Default: 1
     Description: The amount of shards contained in a stream
+  DATA_SOURCE:
+    Type: String
+    Description: The custom data source name. It's recommended to use the original DynamoDB table's name.
+  DATA_SOURCE_ARN:
+    Type: String
+    Description: ARN of the DynamoDB stream. It can be found in the "Exports and streams" tab.
+  
 Resources:
   # =========================================================================================
   # IAM ROLE, POLICY
@@ -196,8 +203,14 @@ Resources:
           SizeInMBs: 128
           IntervalInSeconds: 900
         RoleARN: !Ref IAM_ROLE.Arn
-        Prefix:
-        ErrorOutputPrefix:
+        Prefix: !Join
+          - ''
+          - - !Ref DATA_SOURCE
+            - '/year=!{{timestamp:yyyy}}/month=!{{timestamp:MM}}/day=!{{timestamp:dd}}/hour=!{{timestamp:HH}}'
+        ErrorOutputPrefix: !Join
+          - ''
+          - - !Ref DATA_SOURCE
+            - '-error/year=!{{timestamp:yyyy}}/month=!{{timestamp:MM}}/day=!{{timestamp:dd}}/hour=!{{timestamp:HH}}'
         CompressionFormat: 'GZIP'
         DataFormatConversionConfiguration:
           Enabled: true
@@ -234,6 +247,7 @@ Resources:
       Events:
         Type: DynamoDB
         Properties:
+          Stream: !Ref DATA_SOURCE_ARN
           BatchSize: 1000
           StartingPosition: TRIM_HORIZON
           MaximumRetryAttempts: 1

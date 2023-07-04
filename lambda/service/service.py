@@ -84,8 +84,6 @@ def put_batch_data_stream(output, partition_key, data_stream_name):
                 StreamName=data_stream_name,
                 Records= records
             )
-            #print(response)
-            #print(len(records))
             records.clear()
         record = {
             "Data": json.dumps(observation) + '\n',
@@ -95,9 +93,7 @@ def put_batch_data_stream(output, partition_key, data_stream_name):
         count = count + 1
 
     if len(records) > 0:
-        #print(len(records))
-        response = client.put_records(
+        client.put_records(
                 StreamName=data_stream_name,
                 Records= records
             )
-        #print(response)
