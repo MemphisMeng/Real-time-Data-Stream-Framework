@@ -1,0 +1,7 @@
+{
+    "Parameters": {
+        "Environment": "dev",
+        "DATA_SOURCE": "tableName",
+        "DATA_SOURCE_ARN":"arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
+    }
+}
