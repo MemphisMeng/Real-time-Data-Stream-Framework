@@ -13,7 +13,8 @@ def main(event, environment):
         for record in event['Records']:
             if record['eventName'] in ['INSERT', 'MODIFY']:
                 converted_record = unmarshal_dynamodb_json(record['dynamodb']['NewImage'])
-                converted_record['streaming_timestamp'] = datetime.utcnow()
+                converted_record['streaming_timestamp'] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")
+                output.append(converted_record)
             elif record['eventName'] == 'REMOVE':
                 pass
 
