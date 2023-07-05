@@ -19,6 +19,7 @@ def main(event, environment):
 
         if len(output) > 0:
             partition_key = hashlib.md5(json.dumps(output).encode()).hexdigest()
+            LOGGER.info(f"this is output: {output}")
             put_batch_data_stream(output, partition_key, data_stream)
 
 
