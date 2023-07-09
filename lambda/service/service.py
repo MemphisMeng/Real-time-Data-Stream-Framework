@@ -8,7 +8,7 @@ def main(event, environment):
 
     LOGGER.info(event)
 
-    data_stream = environment["DATA_STREAM"]
+    data_stream = environment["STREAM"]
     try:
         output = []
         for record in event["Records"]:

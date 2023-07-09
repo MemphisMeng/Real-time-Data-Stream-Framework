@@ -166,7 +166,7 @@ Resources:
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties: 
       DeliveryStreamName: !Sub '${Environment}-${AWS::StackName}-Deliver-Stream'
-      DeliveryStreamType: 'KinesisStreamAsSource'
+      DeliveryStreamType: 'DirectPut'
       ExtendedS3DestinationConfiguration: 
         BucketARN: !Ref S3Bucket.Arn
         BufferingHints:
@@ -213,7 +213,7 @@ Resources:
           LOGGING_LEVEL: INFO
           APP_NAME: !Sub '${Environment}-${AWS::StackName}-Streaming-Function'
           APP_ENV: !Ref Environment
-          DATA_STREAM: !REf DataStream.Name
+          STREAM: !REf DeliverStream.Name
       Events:
         DynamoDBTrigger:
           Type: DynamoDB

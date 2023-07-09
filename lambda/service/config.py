@@ -7,7 +7,7 @@ def load_env():
     """Load enviroment variables."""
     try:
         return {
-            "DATA_STREAM": os.environ["DATA_STREAM"],
+            "STREAM": os.environ["STREAM"],
             "LOGGING_LEVEL": os.environ["LOGGING_LEVEL"],
         }
     except KeyError as error:
