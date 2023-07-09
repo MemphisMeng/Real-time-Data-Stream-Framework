@@ -46,7 +46,7 @@ Resources:
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Sid: DeliverStreamAccess
+        - Sid: DeliveryStreamAccess
           Effect: Allow
           Action:
           - firehose:CreateDeliveryStream
@@ -59,7 +59,7 @@ Resources:
           Resource: !Join
             - ''
             - - 'arn:aws:firehose:*:*:deliverystream/'
-              - !Ref DeliverStream.DeliveryStreamName
+              - !Ref DeliveryStream.DeliveryStreamName
         - Sid: S3Access
           Effect: Allow
           Action:
@@ -160,12 +160,12 @@ Resources:
           - Path: !Ref MyS3Bucket
 
   # =========================================================================================
-  # Kinesis Deliver Stream
+  # Kinesis Delivery Stream
   # =========================================================================================
-  DeliverStream:
+  DeliveryStream:
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties: 
-      DeliveryStreamName: !Sub '${Environment}-${AWS::StackName}-Deliver-Stream'
+      DeliveryStreamName: !Sub '${Environment}-${AWS::StackName}-Delivery-Stream'
       DeliveryStreamType: 'DirectPut'
       ExtendedS3DestinationConfiguration: 
         BucketARN: !Ref S3Bucket.Arn
@@ -213,7 +213,7 @@ Resources:
           LOGGING_LEVEL: INFO
           APP_NAME: !Sub '${Environment}-${AWS::StackName}-Streaming-Function'
           APP_ENV: !Ref Environment
-          STREAM: !REf DeliverStream.Name
+          STREAM: !REf DeliveryStream.Name
       Events:
         DynamoDBTrigger:
           Type: DynamoDB
@@ -257,7 +257,7 @@ Resources:
       AlarmActions:
         - !Ref Topic.Arn
   
-  DeliverStreamAlarm:
+  DeliveryStreamAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
       MetricName: 'WriteProvisionedThroughputExceeded'
@@ -265,14 +265,14 @@ Resources:
       Period: 300
       Dimensions:
         - Name: StreamName
-          Value: !Ref DeliverStream.Name
+          Value: !Ref DeliveryStream.Name
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       Period: 300
       Statistic: Sum
       DatapointsToAlarm: 1
       Threshold: 1
-      AlarmName: !Sub '${Environment}-${AWS::StackName}-Deliver-Stream-Alarm'
+      AlarmName: !Sub '${Environment}-${AWS::StackName}-Delivery-Stream-Alarm'
       ActionsEnabled: true
       TreatMissingData: missing
       AlarmActions:
