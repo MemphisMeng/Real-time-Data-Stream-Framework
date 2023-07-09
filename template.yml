@@ -37,9 +37,6 @@ Resources:
             - dynamodb.amazonaws.com
           Action:
           - sts:AssumeRole
-      ManagedPolicyArns:
-      - arn:aws:IAM::aws:policy/AmazonKinesisFullAccess
-      - arn:aws:IAM::aws:policy/AWSLambdaExecute
       Path: '/'
 
   IamPolicy:
@@ -62,23 +59,6 @@ Resources:
           Resource: !Join
             - ''
             - - 'arn:aws:firehose:*:*:deliverystream/'
-              - !Ref DeliverStream.DeliveryStreamName
-        - Sid: DataStreamAccess
-          Effect: Allow
-          Action:
-          - kinesis:CreateStream
-          - kinesis:DeleteStream
-          - kinesis:DescribeStream
-          - kinesis:GetShardIterator
-          - kinesis:ListShards
-          - kinesis:DescribeStreamSummary
-          - kinesis:GetRecords
-          - kinesis:PutRecord
-          - kinesis:PutRecords
-          - kinesis:UpdateShardCount
-          Resource: !Join
-            - ''
-            - - 'arn:aws:kinesis:*:*:stream/'
               - !Ref DeliverStream.DeliveryStreamName
         - Sid: S3Access
           Effect: Allow
@@ -134,16 +114,6 @@ Resources:
           Resource: arn:aws:dynamodb:us-east-1:*:table/*/stream/*
       Roles:
       - !Ref IamRole
-
-  # =========================================================================================
-  # KINESIS DATA STREAM
-  # =========================================================================================
-  DataStream:
-    Type: AWS::Kinesis::Stream
-    Properties:
-      Name: !Sub '${Environment}-${AWS::StackName}-Kinesis-Stream'
-      ShardCount: !Ref Shard
-      RetentionPeriodHours: 8760
 
   # =========================================================================================
   # Logs
