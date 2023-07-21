@@ -1,0 +1,271 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Parameters:
+  Environment:
+    Type: String
+  Shard:
+    Type: Integer
+    Default: 1
+    Description: The amount of shards contained in a stream
+  DATA_SOURCE:
+    Type: String
+    Description: The custom data source name. It's recommended to use the original DynamoDB table's name.
+  DATA_SOURCE_ARN:
+    Type: String
+    Description: ARN of the DynamoDB stream. It can be found in the "Exports and streams" tab.
+  
+Resources:
+  # =========================================================================================
+  # IAM ROLE, POLICY
+  # =========================================================================================
+  IamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-${AWS::StackName}-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+            - firehose.amazonaws.com
+            - kinesis.amazonaws.com
+            - logs.amazonaws.com
+            - s3.amazonaws.com
+            - glue.amazonaws.com
+            - dynamodb.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: '/'
+
+  IamPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub '${Environment}-${AWS::StackName}-policy'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: DeliveryStreamAccess
+          Effect: Allow
+          Action:
+          - firehose:CreateDeliveryStream
+          - firehose:DeleteDeliveryStream
+          - firehose:DescribeDeliveryStream
+          - firehose:PutRecord
+          - firehose:PutRecordBatch
+          - firehose:UpdateDestination
+          - firehose:ListDeliveryStreams
+          Resource: !Join
+            - ''
+            - - 'arn:aws:firehose:*:*:deliverystream/'
+              - !Ref DeliveryStream.DeliveryStreamName
+        - Sid: S3Access
+          Effect: Allow
+          Action:
+          - s3:PutObject
+          - s3:AbortMultipartUpload
+          - s3:GetBucketLocation
+          - s3:GetObject
+          - s3:ListBucket
+          - s3:ListBucketMultipartUploads
+          Resource: !Ref S3Bucket.Arn
+        - Sid: LogsAccess
+          Effect: Allow
+          Action:
+          - logs:CreateLogGroup
+          - logs:DeleteLogGroup
+          - logs:CreateLogStream
+          - logs:DeleteLogStream
+          - logs:PutLogEvents
+          - logs:DeleteRetentionPolicy
+          Resource: !Join
+            - ''
+            - - 'arn:aws:logs:*:log-group:'
+              - !Ref LogGroup.LogGroupName
+              - ':*'
+        - Sid: LambdaAccess
+          Effect: Allow
+          Action:
+          - lambda:InvokeFunction
+          - lambda:GetFunctionConfiguration
+          Resource: arn:aws:lambda:*:*:*:*:*
+        - Sid: GlueAccess
+          Effect: Allow
+          Action:
+          - glue:CreateTable
+          - glue:CreateDatabase
+          - glue:GetDatabase
+          - glue:GetPartition
+          - glue:GetTable
+          - glue:UpdateTable
+          - glue:UpdatePartition
+          - glue:BatchGetPartition
+          - glue:BatchCreatePartition
+          Resource: arn:aws:glue:*:*:*
+        - Sid: DynamoDBAccess
+          Effect: Allow
+          Action:
+          - dynamodb:GetRecords
+          - dynamodb:GetShardIterator
+          - dynamodb:DescribeStream
+          - dynamodb:ListShards
+          - dynamodb:ListStreams
+          Resource: arn:aws:dynamodb:us-east-1:*:table/*/stream/*
+      Roles:
+      - !Ref IamRole
+
+  # =========================================================================================
+  # Logs
+  # =========================================================================================
+  # log group
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: !Sub '${Environment}-${AWS::StackName}-Log-Group'
+  # log stream
+  LogStream:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !GetAtt LogGroup.LogGroupName
+
+  # =========================================================================================
+  # S3 Bucket
+  # =========================================================================================
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${Environment}-${AWS::StackName}-Crawler-Target'
+      AccessControl: 'BucketOwnerFullControl'
+
+  # =========================================================================================
+  # Glue Crawlers
+  # =========================================================================================
+  GlueCrawler:
+    Type: AWS::Glue::Crawler
+    Properties: 
+      Configuration: '{"Version": 1.0, "Grouping": {"TableGroupingPolicy": "CombineCompatibleSchemas" }, "CrawlerOutput": {"Partitions": { "AddOrUpdateBehavior": "InheritFromTable" }}}'
+      DatabaseName: !Sub '${Environment}-${AWS::StackName}-Raw'
+      Name: !Sub '${Environment}-${AWS::StackName}-Glue-Crawler'
+      RecrawlPolicy:
+        RecrawlBehavior: 'CRAWL_NEW_FOLDERS_ONLY'
+      Role: !Ref IamRole
+      Schedule:
+        ScheduleExpression: 'cron(1 * * * ? *)'
+      SchemaChangePolicy:
+        DeleteBehavior: 'LOG'
+        UpdateBehavior: 'LOG'
+      Targets:
+        S3Targets:
+          - Path: !Ref MyS3Bucket
+
+  # =========================================================================================
+  # Kinesis Delivery Stream
+  # =========================================================================================
+  DeliveryStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties: 
+      DeliveryStreamName: !Sub '${Environment}-${AWS::StackName}-Delivery-Stream'
+      DeliveryStreamType: 'DirectPut'
+      ExtendedS3DestinationConfiguration: 
+        BucketARN: !Ref S3Bucket.Arn
+        BufferingHints:
+          SizeInMBs: 128
+          IntervalInSeconds: 900
+        RoleARN: !Ref IamRole.Arn
+        Prefix: !Join
+          - ''
+          - - !Ref DATA_SOURCE
+            - '/year=!{{timestamp:yyyy}}/month=!{{timestamp:MM}}/day=!{{timestamp:dd}}/hour=!{{timestamp:HH}}'
+        ErrorOutputPrefix: !Join
+          - ''
+          - - !Ref DATA_SOURCE
+            - '-error/year=!{{timestamp:yyyy}}/month=!{{timestamp:MM}}/day=!{{timestamp:dd}}/hour=!{{timestamp:HH}}'
+        CompressionFormat: 'GZIP'
+        DataFormatConversionConfiguration:
+          Enabled: true
+        EncryptionConfiguration:
+          NoEncryptionConfig: 'NoEncryption'
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Ref LogGroup.LogGroupName
+          LogStreamName: !Ref LogStream.LogStreamName
+
+  # =========================================================================================
+  # AWS LAMBDA FUNCTION
+  # ========================================================================================= 
+  StreamingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${Environment}-${AWS::StackName}-Streaming-Function'
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.7
+      CodeUri: lambda/
+      Description: Deliver new data into S3 whenever a new upsert in DynamoDB tables is detected via Kinesis Firehose
+      MemorySize: 128
+      Timeout: 900
+      Role: !GetAtt IamRole.Arn
+      Environment:
+        Variables:
+          LOGGING_LEVEL: INFO
+          APP_NAME: !Sub '${Environment}-${AWS::StackName}-Streaming-Function'
+          APP_ENV: !Ref Environment
+          STREAM: !REf DeliveryStream.Name
+      Events:
+        DynamoDBTrigger:
+          Type: DynamoDB
+          Properties:
+            Stream: !Ref DATA_SOURCE_ARN
+            BatchSize: 1000
+            StartingPosition: TRIM_HORIZON
+            MaximumRetryAttempts: 1
+
+  # =========================================================================================
+  # AWS CLOUDWATCH ALARM
+  # =========================================================================================
+  Topic:
+    Type: AWS::SNS::Topic
+    Properties: 
+      FifoTopic: false
+      Subscription: 
+        - Endpoint: abc@gmail.com
+          Protocol: email
+      TopicName: !Sub '${Environment}-${AWS::StackName}-Topic'
+      TracingConfig: String
+  
+  DeliveryStreamAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      MetricName: 'WriteProvisionedThroughputExceeded'
+      Namespace: 'AWS/Kinesis'
+      Period: 300
+      Dimensions:
+        - Name: StreamName
+          Value: !Ref DeliveryStream.Name
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      Period: 300
+      Statistic: Sum
+      DatapointsToAlarm: 1
+      Threshold: 1
+      AlarmName: !Sub '${Environment}-${AWS::StackName}-Delivery-Stream-Alarm'
+      ActionsEnabled: true
+      TreatMissingData: missing
+      AlarmActions:
+        - !Ref Topic.Arn
+
+  StreamingFunctionAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref StreamingFunction
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 300
+      Statistic: Sum
+      Threshold: '1'
+      AlarmActions: 
+        - !Ref Topic.Arn
