@@ -169,7 +169,7 @@
                 "SizeBytes": 755,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "cdd4570bf39d3c092ff2ca3775a4ca1c",
@@ -339,7 +339,7 @@
                 "SizeBytes": 763,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "6fb1edf3a210f44031a9cbf0c8808cd7",
@@ -509,7 +509,7 @@
                 "SizeBytes": 750,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "a7e59ea56293dd835db7b66ec3018ab1",
@@ -717,7 +717,7 @@
                 "SizeBytes": 899,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "fb37c9dc2064646f36fd6c40efd4f9e6",
@@ -887,7 +887,7 @@
                 "SizeBytes": 769,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "9871ec130277c2de519e68865a8aa26b",
@@ -1057,7 +1057,7 @@
                 "SizeBytes": 765,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "dd396ec2b1ad7212ac18836091e01a22",
@@ -1227,7 +1227,7 @@
                 "SizeBytes": 753,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "01797708dddc0bd2def3a4ea9d8dfd14",
@@ -1397,7 +1397,7 @@
                 "SizeBytes": 765,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "df194c15fc5633c02455a90803641e53",
@@ -1529,7 +1529,7 @@
                 "SizeBytes": 633,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "1d21568a759fd33635c6e4d5f164ad68",
@@ -1661,7 +1661,7 @@
                 "SizeBytes": 633,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "7e51e7c8fa54569c6408fe860a21c636",
@@ -1793,7 +1793,7 @@
                 "SizeBytes": 630,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "0742d1d5778a05255dd0255147775c12",
@@ -1963,7 +1963,7 @@
                 "SizeBytes": 750,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "63276428a74161379d9737947a08d26c",
@@ -2133,7 +2133,7 @@
                 "SizeBytes": 753,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "34e9a88f15197076f381badb411e1e0c",
@@ -2303,7 +2303,7 @@
                 "SizeBytes": 753,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "0d26c1df2a93318e2d48baf7dc2bc8da",
@@ -2473,7 +2473,7 @@
                 "SizeBytes": 769,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "9b659a6ccbb361823462ddc98fdd8680",
@@ -2643,7 +2643,7 @@
                 "SizeBytes": 769,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "23a6c023cc6af15a93bc64f0409ffef5",
@@ -2813,7 +2813,7 @@
                 "SizeBytes": 753,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "418595f38fc8d9e46569bc827cad1160",
@@ -2983,7 +2983,7 @@
                 "SizeBytes": 747,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "b1beb005b5eec4f5f1e5460a3c2835c1",
@@ -3115,7 +3115,7 @@
                 "SizeBytes": 630,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "d0b69da032ceeaf7400adacef9b5520e",
@@ -3285,7 +3285,7 @@
                 "SizeBytes": 765,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "0ef40c5113a1a7ffdf96d67e99a21b25",
@@ -3455,7 +3455,7 @@
                 "SizeBytes": 763,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "d8ab608fba692967be9cf2b3a22e8240",
@@ -3625,7 +3625,7 @@
                 "SizeBytes": 769,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "3942177b837f7e3290c41ecd533cba4d",
@@ -3795,7 +3795,7 @@
                 "SizeBytes": 766,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "cf16b664d4115bb84bd4c895679e1bf5",
@@ -3965,7 +3965,7 @@
                 "SizeBytes": 769,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "79bf0399ec7c721e7f6a2fd89588fcf4",
@@ -4135,7 +4135,7 @@
                 "SizeBytes": 771,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "bf5ae552f61926d1de8f43a9295e512b",
@@ -4305,7 +4305,7 @@
                 "SizeBytes": 765,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "46add264487b8cacd1872eacd335d44f",
@@ -4475,7 +4475,7 @@
                 "SizeBytes": 771,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "dcaf68d0541141d58d2f66fee23e245d",
@@ -4607,7 +4607,7 @@
                 "SizeBytes": 617,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         },
         {
             "eventID": "61fd9431f97667a7cfd12200e7d6c2ce",
@@ -4777,7 +4777,7 @@
                 "SizeBytes": 768,
                 "StreamViewType": "NEW_AND_OLD_IMAGES"
             },
-            "eventSourceARN": "arn:aws:dynamodb:us-east-1:807324965916:table/pbr-player-metrics-v2-dev/stream/2022-05-16T03:33:07.896"
+            "eventSourceARN": "arn:aws:dynamodb:us-east-1:23243572810:table/tableName/stream/2023-07-05T13:48:55.351"
         }
     ],
     "aws_request_id": "d68e1ac9-6b36-45f2-80e3-1136a05aac03"
