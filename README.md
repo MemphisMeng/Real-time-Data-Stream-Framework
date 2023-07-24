@@ -16,7 +16,7 @@ sam build -u
 ```
 - Local Testing:
 ```
-sam local invoke "StreamingFunction" -e event.json --env-vars variables.json
+sam local invoke "StreamingFunction" -e event.json --env-vars channels/variables.json
 ```
 - Deploy:
 ```
