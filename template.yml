@@ -4,13 +4,13 @@ Parameters:
   Environment:
     Type: String
   Shard:
-    Type: Integer
+    Type: Number
     Default: 1
     Description: The amount of shards contained in a stream
-  DATA_SOURCE:
+  DataSource:
     Type: String
     Description: The custom data source name. It's recommended to use the original DynamoDB table's name.
-  DATA_SOURCE_ARN:
+  DataSourceArn:
     Type: String
     Description: ARN of the DynamoDB stream. It can be found in the "Exports and streams" tab.
   
@@ -59,7 +59,7 @@ Resources:
           Resource: !Join
             - ''
             - - 'arn:aws:firehose:*:*:deliverystream/'
-              - !Ref DeliveryStream.DeliveryStreamName
+              - !GetAtt DeliveryStream.DeliveryStreamName
         - Sid: S3Access
           Effect: Allow
           Action:
@@ -69,7 +69,7 @@ Resources:
           - s3:GetObject
           - s3:ListBucket
           - s3:ListBucketMultipartUploads
-          Resource: !Ref S3Bucket.Arn
+          Resource: !GetAtt S3Bucket.Arn
         - Sid: LogsAccess
           Effect: Allow
           Action:
@@ -82,7 +82,7 @@ Resources:
           Resource: !Join
             - ''
             - - 'arn:aws:logs:*:log-group:'
-              - !Ref LogGroup.LogGroupName
+              - !GetAtt LogGroup.LogGroupName
               - ':*'
         - Sid: LambdaAccess
           Effect: Allow
@@ -157,7 +157,7 @@ Resources:
         UpdateBehavior: 'LOG'
       Targets:
         S3Targets:
-          - Path: !Ref MyS3Bucket
+          - Path: !Ref S3Bucket
 
   # =========================================================================================
   # Kinesis Delivery Stream
@@ -168,18 +168,18 @@ Resources:
       DeliveryStreamName: !Sub '${Environment}-${AWS::StackName}-Delivery-Stream'
       DeliveryStreamType: 'DirectPut'
       ExtendedS3DestinationConfiguration: 
-        BucketARN: !Ref S3Bucket.Arn
+        BucketARN: !GetAtt S3Bucket.Arn
         BufferingHints:
           SizeInMBs: 128
           IntervalInSeconds: 900
-        RoleARN: !Ref IamRole.Arn
+        RoleARN: !GetAtt IamRole.Arn
         Prefix: !Join
           - ''
-          - - !Ref DATA_SOURCE
+          - - !Ref DataSource
             - '/year=!{{timestamp:yyyy}}/month=!{{timestamp:MM}}/day=!{{timestamp:dd}}/hour=!{{timestamp:HH}}'
         ErrorOutputPrefix: !Join
           - ''
-          - - !Ref DATA_SOURCE
+          - - !Ref DataSource
             - '-error/year=!{{timestamp:yyyy}}/month=!{{timestamp:MM}}/day=!{{timestamp:dd}}/hour=!{{timestamp:HH}}'
         CompressionFormat: 'GZIP'
         DataFormatConversionConfiguration:
@@ -188,8 +188,8 @@ Resources:
           NoEncryptionConfig: 'NoEncryption'
         CloudWatchLoggingOptions:
           Enabled: true
-          LogGroupName: !Ref LogGroup.LogGroupName
-          LogStreamName: !Ref LogStream.LogStreamName
+          LogGroupName: !GetAtt LogGroup.LogGroupName
+          LogStreamName: !GetAtt LogStream.LogStreamName
 
   # =========================================================================================
   # AWS LAMBDA FUNCTION
@@ -210,12 +210,12 @@ Resources:
           LOGGING_LEVEL: INFO
           APP_NAME: !Sub '${Environment}-${AWS::StackName}-Streaming-Function'
           APP_ENV: !Ref Environment
-          STREAM: !REf DeliveryStream.Name
+          STREAM: !GetAtt DeliveryStream.Name
       Events:
         DynamoDBTrigger:
           Type: DynamoDB
           Properties:
-            Stream: !Ref DATA_SOURCE_ARN
+            Stream: !Ref DataSourceArn
             BatchSize: 1000
             StartingPosition: TRIM_HORIZON
             MaximumRetryAttempts: 1
@@ -241,7 +241,7 @@ Resources:
       Period: 300
       Dimensions:
         - Name: StreamName
-          Value: !Ref DeliveryStream.Name
+          Value: !GetAtt DeliveryStream.Name
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       Period: 300
@@ -252,7 +252,7 @@ Resources:
       ActionsEnabled: true
       TreatMissingData: missing
       AlarmActions:
-        - !Ref Topic.Arn
+        - !GetAtt Topic.Arn
 
   StreamingFunctionAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -268,4 +268,4 @@ Resources:
       Statistic: Sum
       Threshold: '1'
       AlarmActions: 
-        - !Ref Topic.Arn
+        - !GetAtt Topic.Arn
