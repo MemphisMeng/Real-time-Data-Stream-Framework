@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 .aws-sam/build.toml
 *.json
+samconfig.toml
+.DS_Store
