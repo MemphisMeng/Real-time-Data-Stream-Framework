@@ -59,7 +59,7 @@ Resources:
           Resource: !Join
             - ''
             - - 'arn:aws:firehose:*:*:deliverystream/'
-              - !GetAtt DeliveryStream.DeliveryStreamName
+              - !Ref DeliveryStream
         - Sid: S3Access
           Effect: Allow
           Action:
@@ -82,7 +82,7 @@ Resources:
           Resource: !Join
             - ''
             - - 'arn:aws:logs:*:log-group:'
-              - !GetAtt LogGroup.LogGroupName
+              - !Ref LogGroup
               - ':*'
         - Sid: LambdaAccess
           Effect: Allow
@@ -127,7 +127,7 @@ Resources:
   LogStream:
     Type: AWS::Logs::LogStream
     Properties:
-      LogGroupName: !GetAtt LogGroup.LogGroupName
+      LogGroupName: !Ref LogGroup
 
   # =========================================================================================
   # S3 Bucket
@@ -135,7 +135,7 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub '${Environment}-${AWS::StackName}-Crawler-Target'
+      BucketName: !Sub '${Environment}-${AWS::StackName}-crawler-target'
       AccessControl: 'BucketOwnerFullControl'
 
   # =========================================================================================
@@ -176,20 +176,20 @@ Resources:
         Prefix: !Join
           - ''
           - - !Ref DataSource
-            - '/year=!{{timestamp:yyyy}}/month=!{{timestamp:MM}}/day=!{{timestamp:dd}}/hour=!{{timestamp:HH}}'
+            - '/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}'
         ErrorOutputPrefix: !Join
           - ''
           - - !Ref DataSource
-            - '-error/year=!{{timestamp:yyyy}}/month=!{{timestamp:MM}}/day=!{{timestamp:dd}}/hour=!{{timestamp:HH}}'
+            - '-error/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/!{firehose:error-output-type}'
         CompressionFormat: 'GZIP'
         DataFormatConversionConfiguration:
-          Enabled: true
+          Enabled: false
         EncryptionConfiguration:
           NoEncryptionConfig: 'NoEncryption'
         CloudWatchLoggingOptions:
           Enabled: true
-          LogGroupName: !GetAtt LogGroup.LogGroupName
-          LogStreamName: !GetAtt LogStream.LogStreamName
+          LogGroupName: !Ref LogGroup
+          LogStreamName: !Ref LogStream
 
   # =========================================================================================
   # AWS LAMBDA FUNCTION
@@ -210,7 +210,7 @@ Resources:
           LOGGING_LEVEL: INFO
           APP_NAME: !Sub '${Environment}-${AWS::StackName}-Streaming-Function'
           APP_ENV: !Ref Environment
-          STREAM: !GetAtt DeliveryStream.Name
+          STREAM: !Ref DeliveryStream
       Events:
         DynamoDBTrigger:
           Type: DynamoDB
@@ -231,7 +231,6 @@ Resources:
         - Endpoint: abc@gmail.com
           Protocol: email
       TopicName: !Sub '${Environment}-${AWS::StackName}-Topic'
-      TracingConfig: String
   
   DeliveryStreamAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -241,7 +240,7 @@ Resources:
       Period: 300
       Dimensions:
         - Name: StreamName
-          Value: !GetAtt DeliveryStream.Name
+          Value: !Ref DeliveryStream
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       Period: 300
@@ -252,7 +251,7 @@ Resources:
       ActionsEnabled: true
       TreatMissingData: missing
       AlarmActions:
-        - !GetAtt Topic.Arn
+        - !GetAtt Topic.TopicArn
 
   StreamingFunctionAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -268,4 +267,4 @@ Resources:
       Statistic: Sum
       Threshold: '1'
       AlarmActions: 
-        - !GetAtt Topic.Arn
+        - !GetAtt Topic.TopicArn
