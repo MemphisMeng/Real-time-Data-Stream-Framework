@@ -10,10 +10,7 @@ Parameters:
   DataSource:
     Type: String
     Description: The custom data source name. It's recommended to use the original DynamoDB table's name.
-  DataSourceArn:
-    Type: String
-    Description: ARN of the DynamoDB stream. It can be found in the "Exports and streams" tab.
-  
+
 Resources:
   # =========================================================================================
   # IAM ROLE, POLICY
@@ -25,18 +22,18 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-            - firehose.amazonaws.com
-            - kinesis.amazonaws.com
-            - logs.amazonaws.com
-            - s3.amazonaws.com
-            - glue.amazonaws.com
-            - dynamodb.amazonaws.com
-          Action:
-          - sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+                - firehose.amazonaws.com
+                - kinesis.amazonaws.com
+                - logs.amazonaws.com
+                - s3.amazonaws.com
+                - glue.amazonaws.com
+                - dynamodb.amazonaws.com
+            Action:
+              - sts:AssumeRole
       Path: '/'
 
   IamPolicy:
@@ -46,84 +43,85 @@ Resources:
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Sid: DeliveryStreamAccess
-          Effect: Allow
-          Action:
-          - firehose:CreateDeliveryStream
-          - firehose:DeleteDeliveryStream
-          - firehose:DescribeDeliveryStream
-          - firehose:PutRecord
-          - firehose:PutRecordBatch
-          - firehose:UpdateDestination
-          - firehose:ListDeliveryStreams
-          Resource: !Join
-            - ''
-            - - 'arn:aws:firehose:*:*:deliverystream/'
-              - !Ref DeliveryStream
-        - Sid: S3Access
-          Effect: Allow
-          Action:
-          - s3:PutObject
-          - s3:AbortMultipartUpload
-          - s3:GetBucketLocation
-          - s3:GetObject
-          - s3:ListBucket
-          - s3:ListBucketMultipartUploads
-          Resource: !GetAtt S3Bucket.Arn
-        - Sid: LogsAccess
-          Effect: Allow
-          Action:
-          - logs:CreateLogGroup
-          - logs:DeleteLogGroup
-          - logs:CreateLogStream
-          - logs:DeleteLogStream
-          - logs:PutLogEvents
-          - logs:DeleteRetentionPolicy
-          Resource: !Join
-            - ''
-            - - 'arn:aws:logs:*:log-group:'
-              - !Ref LogGroup
-              - ':*'
-        - Sid: LambdaAccess
-          Effect: Allow
-          Action:
-          - lambda:InvokeFunction
-          - lambda:GetFunctionConfiguration
-          Resource: arn:aws:lambda:*:*:*:*:*
-        - Sid: GlueAccess
-          Effect: Allow
-          Action:
-          - glue:CreateTable
-          - glue:CreateDatabase
-          - glue:GetDatabase
-          - glue:GetPartition
-          - glue:GetTable
-          - glue:UpdateTable
-          - glue:UpdatePartition
-          - glue:BatchGetPartition
-          - glue:BatchCreatePartition
-          Resource: arn:aws:glue:*:*:*
-        - Sid: DynamoDBAccess
-          Effect: Allow
-          Action:
-          - dynamodb:GetRecords
-          - dynamodb:GetShardIterator
-          - dynamodb:DescribeStream
-          - dynamodb:ListShards
-          - dynamodb:ListStreams
-          Resource: arn:aws:dynamodb:us-east-1:*:table/*/stream/*
+          - Sid: DeliveryStreamAccess
+            Effect: Allow
+            Action:
+              - firehose:CreateDeliveryStream
+              - firehose:DeleteDeliveryStream
+              - firehose:DescribeDeliveryStream
+              - firehose:PutRecord
+              - firehose:PutRecordBatch
+              - firehose:UpdateDestination
+              - firehose:ListDeliveryStreams
+            Resource: !Join
+              - ''
+              - - 'arn:aws:firehose:*:*:deliverystream/'
+                - !Ref DeliveryStream
+          - Sid: S3Access
+            Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:AbortMultipartUpload
+              - s3:GetBucketLocation
+              - s3:GetObject
+              - s3:ListBucket
+              - s3:ListBucketMultipartUploads
+            Resource:
+              - !GetAtt S3Bucket.Arn
+              - !Sub '${S3Bucket.Arn}/*'
+          - Sid: LogsAccess
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:DeleteLogGroup
+              - logs:CreateLogStream
+              - logs:DeleteLogStream
+              - logs:PutLogEvents
+              - logs:DeleteRetentionPolicy
+            Resource: !Join
+              - ''
+              - - 'arn:aws:logs:*:log-group:'
+                - !Ref LogGroup
+                - ':*'
+          - Sid: LambdaAccess
+            Effect: Allow
+            Action:
+              - lambda:InvokeFunction
+              - lambda:GetFunctionConfiguration
+            Resource: arn:aws:lambda:*:*:*:*:*
+          - Sid: GlueAccess
+            Effect: Allow
+            Action:
+              - glue:CreateTable
+              - glue:CreateDatabase
+              - glue:GetDatabase
+              - glue:GetPartition
+              - glue:GetTable
+              - glue:UpdateTable
+              - glue:UpdatePartition
+              - glue:BatchGetPartition
+              - glue:BatchCreatePartition
+            Resource: arn:aws:glue:*:*:*
+          - Sid: DynamoDBAccess
+            Effect: Allow
+            Action:
+              - dynamodb:GetRecords
+              - dynamodb:GetShardIterator
+              - dynamodb:DescribeStream
+              - dynamodb:ListShards
+              - dynamodb:ListStreams
+            Resource: !GetAtt DynamoDBTable.StreamArn
       Roles:
-      - !Ref IamRole
+        - !Ref IamRole
 
   # =========================================================================================
   # Logs
   # =========================================================================================
-  # log group
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
       LogGroupName: !Sub '${Environment}-${AWS::StackName}-Log-Group'
-  # log stream
+
   LogStream:
     Type: AWS::Logs::LogStream
     Properties:
@@ -137,6 +135,25 @@ Resources:
     Properties:
       BucketName: !Sub '${Environment}-${AWS::StackName}-crawler-target'
       AccessControl: 'BucketOwnerFullControl'
+
+  # =========================================================================================
+  # DynamoDB Table with Streams Enabled
+  # =========================================================================================
+  DynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${Environment}-${AWS::StackName}-Table'
+      AttributeDefinitions:
+        - AttributeName: "PrimaryKey"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "PrimaryKey"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
 
   # =========================================================================================
   # Glue Crawlers
@@ -215,7 +232,7 @@ Resources:
         DynamoDBTrigger:
           Type: DynamoDB
           Properties:
-            Stream: !Ref DataSourceArn
+            Stream: !GetAtt DynamoDBTable.StreamArn
             BatchSize: 1000
             StartingPosition: TRIM_HORIZON
             MaximumRetryAttempts: 1
@@ -231,7 +248,7 @@ Resources:
         - Endpoint: abc@gmail.com
           Protocol: email
       TopicName: !Sub '${Environment}-${AWS::StackName}-Topic'
-  
+
   DeliveryStreamAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -243,7 +260,6 @@ Resources:
           Value: !Ref DeliveryStream
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
-      Period: 300
       Statistic: Sum
       DatapointsToAlarm: 1
       Threshold: 1
