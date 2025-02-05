@@ -84,16 +84,19 @@ def unmarshal_value(node):
 
 def put_batch_data_stream(output, partition_key, delivery_stream_name):
 
-    client = boto3.client("firehose")
+    client = boto3.client("kinesis")
     records = []
     count = 1
     for observation in output:
         if count % 20 == 0:
-            client.put_record_batch(DeliveryStreamName=delivery_stream_name, Records=records)
+            client.put_records(StreamName=delivery_stream_name, Records=records)
             records.clear()
-        record = {"Data": json.dumps(observation) + "\n", "PartitionKey": partition_key}
+        record = {
+            "Data": json.dumps(observation) + "\n",
+            "PartitionKey": partition_key
+            }
         records.append(record)
         count = count + 1
 
     if len(records) > 0:
-        client.put_record_batch(DeliveryStreamName=delivery_stream_name, Records=records)
+        client.put_records(StreamName=delivery_stream_name, Records=records)
