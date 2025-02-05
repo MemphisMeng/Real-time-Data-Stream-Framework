@@ -24,9 +24,9 @@ def main(event, environment):
                 pass
 
         if len(output) > 0:
-            partition_key = hashlib.md5(json.dumps(output).encode()).hexdigest()
+            # partition_key = hashlib.md5(json.dumps(output).encode()).hexdigest()
             LOGGER.info(f"this is output: {output}")
-            put_batch_data_stream(output, partition_key, delivery_stream)
+            put_batch_data_stream(output, delivery_stream)
 
     except Exception as e:
         LOGGER.error(str(e), exc_info=True)
@@ -82,21 +82,20 @@ def unmarshal_value(node):
             return data
 
 
-def put_batch_data_stream(output, partition_key, delivery_stream_name):
-
-    client = boto3.client("kinesis")
+def put_batch_data_stream(output, delivery_stream_name):
+    client = boto3.client("firehose")
     records = []
     count = 1
     for observation in output:
         if count % 20 == 0:
-            client.put_records(StreamName=delivery_stream_name, Records=records)
+            client.put_record_batch(DeliveryStreamName=delivery_stream_name, Records=records)
             records.clear()
         record = {
-            "Data": json.dumps(observation) + "\n",
-            "PartitionKey": partition_key
+            "Data": json.dumps(observation),
+            # "PartitionKey": partition_key
             }
         records.append(record)
         count = count + 1
 
     if len(records) > 0:
-        client.put_records(StreamName=delivery_stream_name, Records=records)
+        client.put_record_batch(DeliveryStreamName=delivery_stream_name, Records=records)

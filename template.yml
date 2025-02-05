@@ -78,11 +78,9 @@ Resources:
               - logs:DeleteLogStream
               - logs:PutLogEvents
               - logs:DeleteRetentionPolicy
-            Resource: !Join
-              - ''
-              - - 'arn:aws:logs:*:log-group:'
-                - !Ref LogGroup
-                - ':*'
+            Resource: 
+              - !Join ['', ['arn:aws:logs:*:log-group:', !Ref LogGroup, ':*']]
+              - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${StreamingFunction}:*'
           - Sid: LambdaAccess
             Effect: Allow
             Action:
@@ -111,6 +109,13 @@ Resources:
               - dynamodb:ListShards
               - dynamodb:ListStreams
             Resource: !GetAtt DynamoDBTable.StreamArn
+          - Sid: KinesisAccess
+            Effect: Allow
+            Action:
+              - firehose:PutRecord
+              - firehose:PutRecordBatch
+              - firehose:DescribeDeliveryStream
+            Resource: !GetAtt DeliveryStream.Arn
       Roles:
         - !Ref IamRole
 
