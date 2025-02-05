@@ -7,8 +7,8 @@ jmespath==0.9.5
 jsonpath-ng==1.4.3
 ply==3.11
 python-dateutil==2.8.1
-python-json-logger==0.1.11
-pyyaml==5.3
+python-json-logger==3.2.1
+pyyaml==6.0.2
 s3transfer==0.3.3
 six==1.14.0
 requests==2.7.0
