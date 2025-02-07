@@ -91,7 +91,7 @@ def put_batch_data_stream(output, delivery_stream_name):
             client.put_record_batch(DeliveryStreamName=delivery_stream_name, Records=records)
             records.clear()
         record = {
-            "Data": json.dumps(observation),
+            "Data": json.dumps(observation)  + '\n', # a newline character ensures they are treated as distinct entries.
             # "PartitionKey": partition_key
             }
         records.append(record)
