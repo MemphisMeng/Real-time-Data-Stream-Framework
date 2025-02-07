@@ -179,7 +179,10 @@ Resources:
         UpdateBehavior: 'LOG'
       Targets:
         S3Targets:
-          - Path: !Ref S3Bucket
+          - Path: !Join
+            - '/'
+            - - !Ref S3Bucket
+              - !Ref DynamoDBTable
 
   # =========================================================================================
   # Kinesis Delivery Stream
@@ -192,17 +195,17 @@ Resources:
       ExtendedS3DestinationConfiguration: 
         BucketARN: !GetAtt S3Bucket.Arn
         BufferingHints:
-          SizeInMBs: 128
-          IntervalInSeconds: 900
+          SizeInMBs: 5
+          IntervalInSeconds: 0
         RoleARN: !GetAtt IamRole.Arn
         Prefix: !Join
           - ''
           - - !Ref DynamoDBTable
-            - '/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}'
+            - '/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
         ErrorOutputPrefix: !Join
           - ''
           - - !Ref DynamoDBTable
-            - '-error/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/!{firehose:error-output-type}'
+            - '-error/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/!{firehose:error-output-type}/'
         CompressionFormat: 'GZIP'
         DataFormatConversionConfiguration:
           Enabled: false
