@@ -197,11 +197,11 @@ Resources:
         RoleARN: !GetAtt IamRole.Arn
         Prefix: !Join
           - ''
-          - - !Ref DataSource
+          - - !Ref DynamoDBTable
             - '/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}'
         ErrorOutputPrefix: !Join
           - ''
-          - - !Ref DataSource
+          - - !Ref DynamoDBTable
             - '-error/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/!{firehose:error-output-type}'
         CompressionFormat: 'GZIP'
         DataFormatConversionConfiguration:
