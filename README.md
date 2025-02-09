@@ -20,10 +20,5 @@ sam local invoke "StreamingFunction" -e event.json --env-vars channels/variables
 ```
 - Deploy:
 ```
-for file in channels/*.json; do
-    environment=$(jq -r '.Parameters.Environment' "$file")
-    data_source=$(jq -r '.Parameters.DATA_SOURCE' "$file")
-    data_source_arn=$(jq -r '.Parameters.DATA_SOURCE_ARN' "$file")
-    sam deploy --parameter-overrides Environment=$environment DataSource=$data_source DataSourceArn=$data_source_arn --stack-name test-stack --confirm-changeset --no-fail-on-empty-changeset --capabilities CAPABILITY_NAMED_IAM
-done
+sam deploy --parameter-overrides Environment=dev --stack-name test-stack --confirm-changeset --no-fail-on-empty-changeset --capabilities CAPABILITY_NAMED_IAM
 ```
