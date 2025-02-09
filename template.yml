@@ -10,6 +10,9 @@ Parameters:
   DataSource:
     Type: String
     Description: The custom data source name. It's recommended to use the original DynamoDB table's name.
+  DataSourceArn:
+    Type: String
+    Description: ARN of the DynamoDB stream. It can be found in the "Exports and streams" tab.
 
 Resources:
   # =========================================================================================
@@ -200,11 +203,11 @@ Resources:
         RoleARN: !GetAtt IamRole.Arn
         Prefix: !Join
           - ''
-          - - !Ref DynamoDBTable
+          - - !Ref DataSource
             - '/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
         ErrorOutputPrefix: !Join
           - ''
-          - - !Ref DynamoDBTable
+          - - !Ref DataSource
             - '-error/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/!{firehose:error-output-type}/'
         CompressionFormat: 'GZIP'
         DataFormatConversionConfiguration:
@@ -240,7 +243,7 @@ Resources:
         DynamoDBTrigger:
           Type: DynamoDB
           Properties:
-            Stream: !GetAtt DynamoDBTable.StreamArn
+            Stream: !Ref DataSourceArn
             BatchSize: 1000
             StartingPosition: TRIM_HORIZON
             MaximumRetryAttempts: 1
